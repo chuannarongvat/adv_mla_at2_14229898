@@ -5,12 +5,26 @@ from joblib import load
 import pandas as pd
 from datetime import datetime
 import numpy as np
+import requests
 
 app = FastAPI()
 
+
 mean_sell_price_df = pd.read_csv('../data/mean_sell_price.csv')
 
-predictive_model = load('../models/predictive/xgb_model.joblib')
+MODEL_URL = 'https://drive.google.com/file/d/11mZYOXWwTOemdkomhAtSRTjBkHfe5Quk/view?usp=drive_link'
+
+def download_model_from_drive():
+    """Downloads the model from Google Drive and saves it locally."""
+    response = requests.get(MODEL_URL, allow_redirects=True)
+    with open("sarima_model_downloaded.joblib", "wb") as model_file:
+        model_file.write(response.content)
+
+download_model_from_drive()
+
+predictive_model = load('sarima_model_downloaded.joblib')
+
+#predictive_model = load('../models/predictive/xgb_model.joblib')
 item_id_encoder = load('../models/predictive/item_id_encoder.joblib')
 dept_id_encoder = load('../models/predictive/dept_id_encoder.joblib')
 store_id_encoder = load('../models/predictive/store_id_encoder.joblib')
