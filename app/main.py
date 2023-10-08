@@ -73,26 +73,36 @@ def render_html(body_content: str) -> HTMLResponse:
 def read_root():
     body_content = """
     <h2>Advanced Machine Learning Assignment 2: Machine Learning as a Service</h2>
-    <p>This project is a part of the <strong>"Advanced Machine Learnin Application - Spring 2023"</strong> course, focusing on Assignment 2, <strong>"Machine Learning as a Service".</strong></p>
+    <p>Welcome to our project as part of the <strong>"Advanced Machine Learnin Application - Spring 2023"</strong> course. This initiative revolves around Assignment 2, which empasizes <strong>"Machine Learning as a Service".</strong></p>
     
-    <p><strong>Objective:</strong>  Shops offer items from three distinct categories: hobbies, foods, and household. The primary objectives include:</p>
+    <p><strong>Objective:</strong> We are colloborating with an esteemed American retailer that boasts a network of 10 stores strategically spread across three distinctive states: California (CA), Texas (TX), and Wisconsin (WI). Each of these stores offers a diversified product range spanning three major categories: hobbies, foods, and household. The central objectives are:</p>
     <ol>
-        <li>Developing a predictive model using a Machine Learning algorithm to accurately predict the sales revenue for a given item in a specific store on a given date.</li>
-        <li>Designing a forecasting model utilizing a time-series analysis algorithm that forecasts the total sales revenue across all stores and items for the upcoming 7 days.</li>
+        <li><strong>Predictive Modeling:</strong> Using a state-of-the-art Machine Learning Regression Algorithm, we strive to predict the sales revenue accurately for a specific item in a designated store on any given date.</li>
+        <li><strong>Total Sales Forecasting:</strong> By harenessing the power of time-series analysis algorithms, we can forecast the cumulative sales revenue across all stores and items for the subsequent 7 days.</li>
     </ol>
 
     <h3>Endpoints:</h3>
     <ul>
-        <li><strong>/sales/stores/items/ (GET)</strong>: Navigate to the prediction form to predict the sales revenue for a specific item, store, and date.</li>
-        <li><strong>/sales/stores/items/ (POST)</strong>: Endpoint for the form submission to predict the sales revenue.</li>
-        <li><strong>/forecast/ (GET)</strong>: Forecast the total sales revenue across all stores and items for the next 7 days. Output format TBD.</li>
+        <li><strong>/health/ (GET)</strong>: Health check endpoint confirming the service's operational status (status code 200).</li>
+        <li><strong>/sales/stores/items/ (GET)</strong>: Interface to the predictive form, enabling users to estimate the sales revenue for specific <strong>item, stores, and dates.</strong></li>
+        <li><strong>/sales/stores/items/ (POST)</strong>: Backend endpoint handling the form submission to generate sales revenue predictions.</li>
+        <li><strong>/sales/national/ (GET)</strong>: Provides a forecast of the overall sales revenue across all items and stores for the upcoming week.</li>
     </ul>
 
     <h3>Performance Metrics:</h3>
-    <p>The choice of performance metrics for the models will be determined based on the nature and distribution of the data, and the business objectives. They are yet to be decided.</p>
+    <p>To ensure our models are reliable, we'll use the Root Mean Square Error (RMSE) as the primary performance metric. This choice is backed by our data's nature and distribution, and RMSE's capability to provide a clear measure of model accuracy. Our models have been trained on historical sales store data spanning from January 29, 2011, to April 18, 2015.</p>
 
     <h3>Project Repository:</h3>
-    <p>For more detailed information, data exploration, model building, and other related activities, refer to the <a href="https://github.com/chuannarongvat/adv_mla_at2">GitHub Repository</a>.</p>
+    <p>For an in-depth understanding, including data exploration, model development, and other related tasks, please visit our <a href="https://github.com/chuannarongvat/adv_mla_at2_14229898">GitHub Repository</a>.</p>
+    """
+    return render_html(body_content)
+
+@app.get("/health/", response_class=HTMLResponse)
+def health_check():
+    body_content = """
+    <h2>Welcome to Advanced Machine Learning Assignment 2!</h2>
+    <p>This is a health check endpoint confirming the service is running.</p>
+    <p>Status: <strong>Healthy</strong></p>
     """
     return render_html(body_content)
 
