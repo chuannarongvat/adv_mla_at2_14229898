@@ -137,10 +137,32 @@ async def predict_sales(item_id: str = Form(None), store_id: str = Form(None), d
         return render_html(content)
     
     content = ""
-    # 1. Lookup the sell price.
+                    
+    store_id_list = ['CA_1', 'CA_2', 'CA_3', 'CA_4', 'TX_1', 'TX_2', 'TX_3', 'WI_1', 'WI_2', 'WI_3']
+    if store_id not in store_id_list:
+        content = f"""
+        <h2>Error</h2>
+        <p>Invalid Store Id: <strong>{store_id}.</strong> Must be one of <strong>{', '.join(store_id_list)}</strong></p>
+        
+        <br>
+        <br>
+        <a href="/sales/stores/items/" style="display: inline-block; padding: 10px 15px; background-color: #007BFF; color: #fff; border-radius: 4px; text-decoration: none; cursor: pointer;">Go Back</a>
+        """
+        return render_html(content)
+    
+        # 3. Handle date-related manipulations.
+    date_dt = pd.to_datetime(date)
+    year = date_dt.year
+    month = date_dt.month
+    # week_number = np.ceil((date_dt - pd.Timestamp('2011-01-29')) / np.timedelta64(1, 'W')).astype(int) + 1
+    day_of_week = date_dt.dayofweek
+    # season_sin = np.sin(2 * np.pi * month / 12)
+    # season_cos = np.cos(2 * np.pi * month / 12)
+    
+        # 1. Lookup the sell price.
     try:
-        sell_price = mean_sell_item_id_month[(mean_sell_item_id_month['item_id'] == item_id) & (mean_sell_item_id_month['store_id'] == store_id)]['sell_price'].values[0]
-        sales = mean_sell_item_id_month[(mean_sell_item_id_month['item_id'] == item_id) & (mean_sell_item_id_month['store_id'] == store_id)]['sales'].values[0]
+        sell_price = mean_sell_item_id_month[(mean_sell_item_id_month['item_id'] == item_id) & (mean_sell_item_id_month['store_id'] == store_id) & (mean_sell_item_id_month['month'] == month)]['sell_price'].values[0]
+        sales = mean_sell_item_id_month[(mean_sell_item_id_month['item_id'] == item_id) & (mean_sell_item_id_month['store_id'] == store_id) & (mean_sell_item_id_month['month'] == month)]['sales'].values[0]
     except IndexError:
         content = f"""
         <h2>Predicted Sales Revenue</h2>
@@ -148,18 +170,6 @@ async def predict_sales(item_id: str = Form(None), store_id: str = Form(None), d
         <p>No item_id {item_id} in the store.</p> 
         
         <p>Please select a different item_id.</p>
-        
-        <br>
-        <br>
-        <a href="/sales/stores/items/" style="display: inline-block; padding: 10px 15px; background-color: #007BFF; color: #fff; border-radius: 4px; text-decoration: none; cursor: pointer;">Go Back</a>
-        """
-        return render_html(content)
-                
-    store_id_list = ['CA_1', 'CA_2', 'CA_3', 'CA_4', 'TX_1', 'TX_2', 'TX_3', 'WI_1', 'WI_2', 'WI_3']
-    if store_id not in store_id_list:
-        content = f"""
-        <h2>Error</h2>
-        <p>Invalid Store Id: <strong>{store_id}.</strong> Must be one of <strong>{', '.join(store_id_list)}</strong></p>
         
         <br>
         <br>
@@ -175,14 +185,7 @@ async def predict_sales(item_id: str = Form(None), store_id: str = Form(None), d
     store_id_encoded = store_id_encoder.transform([store_id])[0]
     state_id_encoded = state_id_encoder.transform([store_id.split('_')[0]])[0]
     
-    # 3. Handle date-related manipulations.
-    date_dt = pd.to_datetime(date)
-    year = date_dt.year
-    month = date_dt.month
-    # week_number = np.ceil((date_dt - pd.Timestamp('2011-01-29')) / np.timedelta64(1, 'W')).astype(int) + 1
-    day_of_week = date_dt.dayofweek
-    # season_sin = np.sin(2 * np.pi * month / 12)
-    # season_cos = np.cos(2 * np.pi * month / 12)
+
     
     # 4. Assemble the final DataFrame.
     user_input = pd.DataFrame({
