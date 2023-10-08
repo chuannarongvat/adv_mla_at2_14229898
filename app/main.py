@@ -3,30 +3,18 @@ from fastapi.responses import HTMLResponse
 from joblib import load
 import pandas as pd
 import numpy as np
-import requests
-import os
 
 app = FastAPI()
 
+mean_sell_item_id_month = pd.read_csv('../data/mean_sales_item_id_month.csv')
 
-mean_sell_price_df = pd.read_csv('../data/mean_sell_price.csv')
-
-# MODEL_URL = 'https://studentutsedu-my.sharepoint.com/personal/narongvat_chingpayakmon_student_uts_edu_au/_layouts/15/download.aspx?SourceUrl=%2Fpersonal%2Fnarongvat%5Fchingpayakmon%5Fstudent%5Futs%5Fedu%5Fau%2FDocuments%2Fsarima%5Fmodel%2Ejoblib'
-
-# def download_model_from_onedrive():
-#     if not os.path.exists('sarima_model_downaloaded.joblib'):
-#         response = requests.get(MODEL_URL, allow_redirects=True)
-#         with open("sarima_model_downloaded.joblib", "wb") as model_file:
-#             model_file.write(response.content)
-
-# download_model_from_onedrive()
-
-predictive_model = load('../models/predictive/xgb_model.joblib')
 item_id_encoder = load('../models/predictive/item_id_encoder.joblib')
 dept_id_encoder = load('../models/predictive/dept_id_encoder.joblib')
 store_id_encoder = load('../models/predictive/store_id_encoder.joblib')
 state_id_encoder = load('../models/predictive/state_id_encoder.joblib')
 cat_id_encoder = load('../models/predictive/cat_id_encoder.joblib')
+
+predictive_model = load('../models/predictive/xgb_model_reduce.joblib')
 
 forecasting_model = load('../models/forecasting/sarima_model.joblib')
 
@@ -151,7 +139,8 @@ async def predict_sales(item_id: str = Form(None), store_id: str = Form(None), d
     content = ""
     # 1. Lookup the sell price.
     try:
-        sell_price = mean_sell_price_df[mean_sell_price_df['item_id'] == item_id]['sell_price'].values[0]
+        sell_price = mean_sell_item_id_month[(mean_sell_item_id_month['item_id'] == item_id) & (mean_sell_item_id_month['store_id'] == store_id)]['sell_price'].values[0]
+        sales = mean_sell_item_id_month[(mean_sell_item_id_month['item_id'] == item_id) & (mean_sell_item_id_month['store_id'] == store_id)]['sales'].values[0]
     except IndexError:
         content = f"""
         <h2>Predicted Sales Revenue</h2>
@@ -190,10 +179,10 @@ async def predict_sales(item_id: str = Form(None), store_id: str = Form(None), d
     date_dt = pd.to_datetime(date)
     year = date_dt.year
     month = date_dt.month
-    week_number = np.ceil((date_dt - pd.Timestamp('2011-01-29')) / np.timedelta64(1, 'W')).astype(int) + 1
+    # week_number = np.ceil((date_dt - pd.Timestamp('2011-01-29')) / np.timedelta64(1, 'W')).astype(int) + 1
     day_of_week = date_dt.dayofweek
-    season_sin = np.sin(2 * np.pi * month / 12)
-    season_cos = np.cos(2 * np.pi * month / 12)
+    # season_sin = np.sin(2 * np.pi * month / 12)
+    # season_cos = np.cos(2 * np.pi * month / 12)
     
     # 4. Assemble the final DataFrame.
     user_input = pd.DataFrame({
@@ -202,13 +191,22 @@ async def predict_sales(item_id: str = Form(None), store_id: str = Form(None), d
         'cat_id': [cat_id_encoded],
         'store_id': [store_id_encoded],
         'state_id': [state_id_encoded],
+        'sales': [sales],
         'sell_price': [sell_price],
         'year': [year],
         'month': [month],
-        'week_number': [week_number],
+        # 'week_number': [week_number],
         'day_of_week': [day_of_week],
-        'season_sin': [season_sin],
-        'season_cos': [season_cos]
+        # 'season_sin': [season_sin],
+        # 'season_cos': [season_cos]
+        'ema_sales_7': [np.nan],
+        'rolling_std_7': [np.nan],
+        'ema_sales_14': [np.nan],
+        'rolling_std_14': [np.nan],
+        'ema_sales_21': [np.nan],
+        'rolling_std_21': [np.nan],
+        'ema_sales_28': [np.nan],
+        'rolling_std_28': [np.nan],
     })
     
     sales_pred = predictive_model.predict(user_input)[0]

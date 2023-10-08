@@ -1,4 +1,3 @@
-# FastAPI and essential packages
 scikit-learn==1.2.2
 pandas==2.0.1
 fastapi==0.88.0
