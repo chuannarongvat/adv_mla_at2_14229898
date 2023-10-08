@@ -1,30 +1,27 @@
-from fastapi import FastAPI, HTTPException, Form
+from fastapi import FastAPI, Form
 from fastapi.responses import HTMLResponse
-from starlette.responses import JSONResponse
 from joblib import load
 import pandas as pd
-from datetime import datetime
 import numpy as np
 import requests
+import os
 
 app = FastAPI()
 
 
 mean_sell_price_df = pd.read_csv('../data/mean_sell_price.csv')
 
-MODEL_URL = 'https://drive.google.com/file/d/11mZYOXWwTOemdkomhAtSRTjBkHfe5Quk/view?usp=drive_link'
+# MODEL_URL = 'https://studentutsedu-my.sharepoint.com/personal/narongvat_chingpayakmon_student_uts_edu_au/_layouts/15/download.aspx?SourceUrl=%2Fpersonal%2Fnarongvat%5Fchingpayakmon%5Fstudent%5Futs%5Fedu%5Fau%2FDocuments%2Fsarima%5Fmodel%2Ejoblib'
 
-def download_model_from_drive():
-    """Downloads the model from Google Drive and saves it locally."""
-    response = requests.get(MODEL_URL, allow_redirects=True)
-    with open("sarima_model_downloaded.joblib", "wb") as model_file:
-        model_file.write(response.content)
+# def download_model_from_onedrive():
+#     if not os.path.exists('sarima_model_downaloaded.joblib'):
+#         response = requests.get(MODEL_URL, allow_redirects=True)
+#         with open("sarima_model_downloaded.joblib", "wb") as model_file:
+#             model_file.write(response.content)
 
-download_model_from_drive()
+# download_model_from_onedrive()
 
-predictive_model = load('sarima_model_downloaded.joblib')
-
-#predictive_model = load('../models/predictive/xgb_model.joblib')
+predictive_model = load('../models/predictive/xgb_model.joblib')
 item_id_encoder = load('../models/predictive/item_id_encoder.joblib')
 dept_id_encoder = load('../models/predictive/dept_id_encoder.joblib')
 store_id_encoder = load('../models/predictive/store_id_encoder.joblib')
