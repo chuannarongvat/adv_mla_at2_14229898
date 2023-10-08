@@ -56,3 +56,57 @@ def extract_features_target(df_train, df_test, target_feature):
     y_test = df_test[target_feature]
     
     return X_train, X_test, y_train, y_test
+
+from statsmodels.tsa.stattools import adfuller
+def adf_test(series):
+    result = adfuller(series, autolag='AIC')
+    print(f'ADF Statistic: {result[0]}')
+    print(f'p-value: {result[1]}')
+    for key, value in result[4].items():
+        print('Critical Values:')
+        print(f'   {key}, {value}')
+    if result[1] <= 0.05:
+        print("Data is stationary")
+    else:
+        print("Data is non-stationary")
+        
+from statsmodels.tsa.seasonal import seasonal_decompose
+import matplotlib.pyplot as plt
+def plot_decomposed_time_series(data, model='additive', period=365):
+    seasonal_decompose_result = seasonal_decompose(data, model=model, period=period)
+    
+    observed = seasonal_decompose_result.observed
+    trend = seasonal_decompose_result.trend
+    seasonal = seasonal_decompose_result.seasonal
+    residual = seasonal_decompose_result.resid
+    
+    fig, axes = plt.subplots(4, 1, figsize=(14, 8), sharex=True)
+    
+    observed.plot(ax=axes[0])
+    axes[0].set(ylabel='Observed')
+    axes[0].set_title('Decomposition of Total Revenue')
+    
+    trend.plot(ax=axes[1])
+    axes[1].set(ylabel='Trend')
+    
+    seasonal.plot(ax=axes[2])
+    axes[2].set(ylabel='Seasonal')
+    
+    residual.plot(ax=axes[3])
+    axes[3].set(ylabel='Residual')
+    
+    plt.tight_layout()
+    plt.show()
+    
+from statsmodels.graphics.tsaplots import plot_acf, plot_pacf
+def plot_acf_pacf(data, lags=40):
+
+    fig, (ax1, ax2) = plt.subplots(2, 1)
+    plot_acf(data, lags=lags, ax=ax1)
+    ax1.set_title(f'Autocorrelation Function (ACF), lags={lags}')
+
+    plot_pacf(data, lags=lags, ax=ax2)
+    ax2.set_title(f'Partial Autocorrelation Function (PACF), lags={lags}')
+
+    plt.tight_layout()
+    plt.show()
