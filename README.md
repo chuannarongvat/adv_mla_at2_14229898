@@ -79,15 +79,6 @@ Project Organization
     │
     └── tox.ini            <- tox file with settings for running tox; see tox.readthedocs.io
 
-Running the Application
-1. Ensure you have Docker installed on the system.
-2. Navigate to the root directory of the project.
-3. Build the Docker image: `docker build -t adv_mla_at2_14229898 .`
-4. Run the Docker container: `docker run -p 8000:8000 adv_mla_at2_14229898`
-5. Acess the application on: `http://localhost:8000`
-6. Ensure that all dependencies are installed using `requirements.txt` file: `pip install -r requirements.txt`
-
-
 
 --------
 
