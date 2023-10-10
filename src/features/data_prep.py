@@ -37,7 +37,7 @@ def preprocess(df):
     # Calculate EMA and lags
     periods = [7, 14, 21, 28]
     for period in periods:
-        df[f'ema_sales_{period}'] = df['total_sales'].ewm(span=period).mean()
+        df[f'ema_total_sales_{period}'] = df['total_sales'].ewm(span=period).mean()
         #df[f'lag_sales_{period}'] = df['total_sales'].shift(period)
         df[f'rolling_std_{period}'] = df['total_sales'].rolling(window=period).std()
     
@@ -53,9 +53,44 @@ def preprocess(df):
     df['store_id'] = store_id_encoder.fit_transform(df['store_id'])
     df['state_id'] = state_id_encoder.fit_transform(df['state_id'])
     df['cat_id'] = cat_id_encoder.fit_transform(df['cat_id'])
-    
-    df['total_sales'] = df['sell_price'] * df['sales']
         
+    df.drop(['id', 'date', 'wm_yr_wk', 'd', 'event_name', 'event_type'], axis=1, inplace=True)
+    
+    return df, item_id_encoder, dept_id_encoder, store_id_encoder, state_id_encoder, cat_id_encoder
+
+def preprocess_no_sales_historical(df):
+    df['total_sales'] = df['sell_price'] * df['sales']
+    
+    # Convert 'date' column to datetime and extract date-related features
+    df['year'] = df['date'].dt.year
+    df['month'] = df['date'].dt.month
+    df['week_number'] = np.ceil((df['date'] - pd.Timestamp('2011-01-29')) / np.timedelta64(1, 'W')).astype(int) + 1
+    df['day_of_week'] = df['date'].dt.dayofweek
+    
+    # Add seasonality features
+    df['season_sin'] = np.sin(2 * np.pi * df['month'] / 12)
+    df['season_cos'] = np.cos(2 * np.pi * df['month'] / 12)
+    
+    # Calculate EMA and lags
+    # periods = [7, 14, 21, 28]
+    # for period in periods:
+    #     df[f'ema_sales_{period}'] = df['total_sales'].ewm(span=period).mean()
+    #     #df[f'lag_sales_{period}'] = df['total_sales'].shift(period)
+    #     df[f'rolling_std_{period}'] = df['total_sales'].rolling(window=period).std()
+    
+    # Label encode categorical columns
+    item_id_encoder = LabelEncoder()
+    dept_id_encoder = LabelEncoder()
+    store_id_encoder = LabelEncoder()
+    state_id_encoder = LabelEncoder()
+    cat_id_encoder = LabelEncoder()
+    
+    df['item_id'] = item_id_encoder.fit_transform(df['item_id'])
+    df['dept_id'] = dept_id_encoder.fit_transform(df['dept_id'])
+    df['store_id'] = store_id_encoder.fit_transform(df['store_id'])
+    df['state_id'] = state_id_encoder.fit_transform(df['state_id'])
+    df['cat_id'] = cat_id_encoder.fit_transform(df['cat_id'])
+     
     df.drop(['id', 'date', 'wm_yr_wk', 'd', 'event_name', 'event_type'], axis=1, inplace=True)
     
     return df, item_id_encoder, dept_id_encoder, store_id_encoder, state_id_encoder, cat_id_encoder

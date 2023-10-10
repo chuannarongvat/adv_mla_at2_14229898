@@ -19,9 +19,6 @@ predictive_model = load('../models/predictive/xgb_model_reduce.joblib')
 forecasting_model = load('../models/forecasting/sarima_model.joblib')
 
 def render_html(body_content: str) -> HTMLResponse:
-    """
-    Render the provided body content within a standard HTML template.
-    """
     html_template = f"""
     <html>
         <head>
